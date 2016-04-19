@@ -60,14 +60,24 @@ public class generateReport {
 			
 			// Run a more complicated query
 			System.out.println("\n\nA useful query:");
-			myRs = myStmt.executeQuery("SELECT enrolledin.CRN, scheduledcourses.section, COUNT(enrolledin.wNumber) AS NumberOfStudents " +  
-			"FROM coscuw.enrolledin " +  
-			"INNER JOIN coscuw.scheduledcourses " + 
-			"ON enrolledin.CRN = scheduledcourses.crn " + 
-			"GROUP BY CRN " + 
-			"HAVING COUNT(*)<=3 " +
-			"ORDER BY NumberOfStudents ASC, enrolledin.CRN ASC " +
-			"LIMIT 10 ");
+			myRs = myStmt.executeQuery(
+			"SELECT * " +
+			"FROM coursenotes RIGHT JOIN " +
+				"( SELECT enrolledin.CRN AS underEnrolledCRN, " +  
+					"offeringof.subject, " +
+					"offeringof.number, " +
+					"scheduledcourses.section,  " +
+					"offeringof.title,  " +
+					"COUNT(enrolledin.wNumber) AS NumberOfStudents " +
+				"FROM coscuw.enrolledin " +  
+					"JOIN coscuw.scheduledcourses ON enrolledin.CRN = scheduledcourses.crn " + 
+					"JOIN coscuw.offeringof ON scheduledcourses.crn = offeringof.CRN " + 
+				"GROUP BY underEnrolledCRN " + 
+				"HAVING COUNT(*)<=3 " +
+				"ORDER BY NumberOfStudents DESC, enrolledin.CRN ASC " +
+				"LIMIT 10) AS lowEnrollment " +
+			"ON coursenotes.CRN=lowEnrollment.underEnrolledCRN ; "
+			);
 			
 			displayUnderEnrolledCourses(myRs);
 			// writeToFileUnderEnrolledCourses(myRs);
