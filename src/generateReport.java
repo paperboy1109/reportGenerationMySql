@@ -20,6 +20,8 @@ public class generateReport {
 		PreparedStatement myStmt = null;
 		ResultSet myRs = null;
 		
+		int pageCount = 0;
+		
 		try {
 			// 1. Get a connection to database
 			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/coscuw", "student" , "student");
@@ -73,15 +75,19 @@ public class generateReport {
 					"JOIN coscuw.scheduledcourses ON enrolledin.CRN = scheduledcourses.crn " + 
 					"JOIN coscuw.offeringof ON scheduledcourses.crn = offeringof.CRN " + 
 				"GROUP BY underEnrolledCRN " + 
-				"HAVING COUNT(*)<=3 " +
-				"ORDER BY NumberOfStudents DESC, enrolledin.CRN ASC " +
-				"LIMIT 10) AS lowEnrollment " +
+				"HAVING COUNT(*)<=5 AND scheduledcourses.section=3 AND underEnrolledCRN<11000 " +
+				"ORDER BY NumberOfStudents ASC, enrolledin.CRN ASC " +
+				"LIMIT 50) AS lowEnrollment " +
 			"ON coursenotes.CRN=lowEnrollment.underEnrolledCRN ; "
 			);
 			
-			displayUnderEnrolledCourses(myRs);
+			//displayUnderEnrolledCourses(myRs);
 			// writeToFileUnderEnrolledCourses(myRs);
 			// printTest();
+			
+			//printHeader();
+			//displayAll(myRs);
+			displayCourseInfo(myRs);
 
 
 		}
@@ -103,6 +109,8 @@ public class generateReport {
 		}
 	}
 
+	
+	
 	private static void display(ResultSet myRs) throws SQLException {
 		while (myRs.next()) {
 			
@@ -112,6 +120,87 @@ public class generateReport {
 			
 			System.out.printf("%s, %.0f\n", studentWNum, courseCRN);
 		}
+	}
+
+	
+	
+	private static void displayAll(ResultSet myRs) throws SQLException {
+		while (myRs.next()) {
+			
+			int courseCRN = myRs.getInt("underEnrolledCRN");
+			int noteNumber = myRs.getInt("notenumber");
+			String studentWNum = myRs.getString("note");
+			
+			String courseSubject = myRs.getString("subject");
+			int courseNumber = myRs.getInt("number");
+			int courseSection = myRs.getInt("section");
+			String courseTitle = myRs.getString("title");
+			int studentCount = myRs.getInt("NumberOfStudents");
+			
+			System.out.printf("CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+		}
+	}
+	
+	
+	private static void displayCourseInfo(ResultSet myRs) throws SQLException {
+		
+		int currentCRN = 0;
+		
+		while (myRs.next()) {
+			
+			int courseCRN = myRs.getInt("underEnrolledCRN");
+			int noteNumber = myRs.getInt("notenumber");
+			String courseNote = myRs.getString("note");
+			
+			String courseSubject = myRs.getString("subject");
+			int courseNumber = myRs.getInt("number");
+			int courseSection = myRs.getInt("section");
+			String courseTitle = myRs.getString("title");
+			int studentCount = myRs.getInt("NumberOfStudents");
+			
+			if (courseCRN!=currentCRN) {
+				System.out.printf("  CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+				System.out.printf("\t Notes: ");
+				currentCRN = courseCRN;
+			}
+
+			//System.out.printf("\t Note: %d, %s \n", noteNumber, courseNote);
+			if (noteNumber != 1) {
+				System.out.printf("\t");
+			}
+			System.out.printf(" %s \n", courseNote);
+		}
+	}
+	
+	
+	private static void printHeader() throws SQLException {
+		
+		// Create a heading for the document
+		String greetings = "Hello, Daniel !";
+		String description = "This file is so cool";
+	
+		try {
+			System.out.println("Trying to write file ...");
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File("reportDocument.doc"), true));
+			writer.write(greetings);
+			writer.newLine();
+			
+			writer.write("Page 1 information" + (char)12);  
+			
+	        writer.write("Page 2 after page break char");  
+			
+			writer.newLine();
+			writer.write(description);
+			writer.newLine();
+			writer.newLine();
+			writer.close();
+	
+			System.out.println("End");
+	
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		
 	}
 	
 	
@@ -210,28 +299,6 @@ public class generateReport {
 	}
 	
 	
-	
-	public static void printTest() {
-		
-		String greetings = "Hello, Daniel !";
-		String description = "This file is so cool";
-		
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File("textfileTest.txt")));
-			writer.write(greetings);
-			writer.newLine();
-			writer.write(description);
-			writer.close();
-			System.out.println("End");
-
-
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		
-		
-	}
 	
 	
 }
