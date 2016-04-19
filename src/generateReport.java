@@ -159,16 +159,22 @@ public class generateReport {
 			int studentCount = myRs.getInt("NumberOfStudents");
 			
 			if (courseCRN!=currentCRN) {
-				System.out.printf("  CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+				System.out.printf("\n  CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+				System.out.printf("  %s %d %s \t(Section %d)\n", courseSubject, courseNumber, courseTitle, courseSection);
 				System.out.printf("\t Notes: ");
 				currentCRN = courseCRN;
 			}
 
 			//System.out.printf("\t Note: %d, %s \n", noteNumber, courseNote);
-			if (noteNumber != 1) {
+			if (courseNote == null) {
+				System.out.printf("none\n");
+			} else if (noteNumber != 1) {
 				System.out.printf("\t");
-			}
+				System.out.printf(" %s \n", courseNote);
+			} else {
 			System.out.printf(" %s \n", courseNote);
+			}
+			
 		}
 	}
 	
@@ -178,6 +184,8 @@ public class generateReport {
 		// Create a heading for the document
 		String greetings = "Hello, Daniel !";
 		String description = "This file is so cool";
+		
+		//
 	
 		try {
 			System.out.println("Trying to write file ...");
