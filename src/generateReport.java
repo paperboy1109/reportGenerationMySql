@@ -85,9 +85,11 @@ public class generateReport {
 			// writeToFileUnderEnrolledCourses(myRs);
 			// printTest();
 			
-			//printHeader();
+		
 			//displayAll(myRs);
 			//displayCourseInfo(myRs);
+			
+			// printHeader();
 			createReportDocument(myRs);
 
 
@@ -112,73 +114,7 @@ public class generateReport {
 
 	
 	
-	private static void display(ResultSet myRs) throws SQLException {
-		while (myRs.next()) {
-			
-			String studentWNum = myRs.getString("wNumber");
-			double courseCRN = myRs.getDouble("CRN");
 
-			
-			System.out.printf("%s, %.0f\n", studentWNum, courseCRN);
-		}
-	}
-
-	
-	
-	private static void displayAll(ResultSet myRs) throws SQLException {
-		while (myRs.next()) {
-			
-			int courseCRN = myRs.getInt("underEnrolledCRN");
-			int noteNumber = myRs.getInt("notenumber");
-			String studentWNum = myRs.getString("note");
-			
-			String courseSubject = myRs.getString("subject");
-			int courseNumber = myRs.getInt("number");
-			int courseSection = myRs.getInt("section");
-			String courseTitle = myRs.getString("title");
-			int studentCount = myRs.getInt("NumberOfStudents");
-			
-			System.out.printf("CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
-		}
-	}
-	
-	
-	private static void displayCourseInfo(ResultSet myRs) throws SQLException {
-		
-		int currentCRN = 0;
-		
-		while (myRs.next()) {
-			
-			int courseCRN = myRs.getInt("underEnrolledCRN");
-			int noteNumber = myRs.getInt("notenumber");
-			String courseNote = myRs.getString("note");
-			
-			String courseSubject = myRs.getString("subject");
-			int courseNumber = myRs.getInt("number");
-			int courseSection = myRs.getInt("section");
-			String courseTitle = myRs.getString("title");
-			int studentCount = myRs.getInt("NumberOfStudents");
-			
-			if (courseCRN!=currentCRN) {
-				System.out.printf("\n  CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
-				System.out.printf("  %s %d %s \t(Section %d)\n", courseSubject, courseNumber, courseTitle, courseSection);
-				System.out.printf("\t Notes: ");
-				currentCRN = courseCRN;
-			}
-
-			//System.out.printf("\t Note: %d, %s \n", noteNumber, courseNote);
-			if (courseNote == null) {
-				System.out.printf("none\n");
-			} else if (noteNumber != 1) {
-				System.out.printf("\t");
-				System.out.printf(" %s \n", courseNote);
-			} else {
-			System.out.printf(" %s \n", courseNote);
-			}
-			
-		}
-	}
-	
 	
 	private static void createReportDocument(ResultSet myRs) throws SQLException {
 		
@@ -186,10 +122,12 @@ public class generateReport {
 		
 		int pageCount = 0;
 		int lineCount = 0;
+		String lineCount_str = "";
 		int currentCRN = 0;
 		String currentCRN_str = "";
+		String colText = "";
+		String outputText = "";
 	
-
 
 		while (myRs.next()) {
 			
@@ -237,12 +175,60 @@ public class generateReport {
 					//writer.newLine();
 					//writer.write("*** Here's the good stuff ***");
 					
-					writer.write("\n  CRN: " + courseCRN_str + ", Number of students enrolled: " + studentCount_str + "\n");
-					writer.write("  " + courseSubject + " ");
-					writer.write(courseNumber_str);
-					writer.write(" " + courseTitle);
-					writer.write("\t (Section " + courseSection_str + ")\n");
-					writer.write("\tNotes: ");
+					
+					// Initial format (not organized by column)
+					//writer.write("\n  CRN: " + courseCRN_str + ", Number of students enrolled: " + studentCount_str + "\n");
+					//writer.write("  " + courseSubject + " ");
+					//writer.write(courseNumber_str);
+					//writer.write(" " + courseTitle);
+					//writer.write("\t (Section " + courseSection_str + ")\n");
+					//lineCount=lineCount+3;
+					
+					
+					
+					// Print course info column-wise
+					//setColWidth()
+			        //writer.write(setColWidth("CRN", 5) + "*");
+			        //writer.write(setColWidth("Enrolled", 8) + "*");
+			        //writer.write(setColWidth("Subject", 5) + "*");
+			        //writer.write(setColWidth("Number", 6) + "*");
+			        //writer.write(setColWidth("Section", 7) + "*");
+			        //writer.write(setColWidth("Title", 31) + "*");
+			        //writer.newLine();
+			        
+			        
+			        //writer.write(setColWidth(courseCRN_str, 5) + "*");
+			        //writer.write(setColWidth(studentCount_str, 8) + "*");
+			        //writer.write(setColWidth(courseSubject, 5) + "*");
+			        //writer.write(setColWidth(courseNumber_str, 6) + "*");
+			        //writer.write(setColWidth(courseSection_str, 7) + "*");
+			        //writer.write(setColWidth(courseTitle, 31) + "*");
+			        //writer.newLine();
+			        
+			        // Is padLeft better?
+			        //writer.write(padLeft(courseCRN_str, 5) + "*");
+			        //writer.write(padLeft(studentCount_str, 8) + "*");
+			        //writer.write(padLeft(courseSubject, 5) + "*");
+			        //writer.write(padLeft(courseNumber_str, 6) + "*");
+			        //writer.write(padLeft(courseSection_str, 7) + "*");
+			        //writer.write(padLeft(courseTitle, 31) + "*");
+			        //writer.newLine();
+			        
+					
+			        // Create a single string per line with fixed spacing
+					writer.newLine();
+			        colText = String.format("%-6s %-8s %-8s %-8s %-8s %-31s", "CRN", "Enrolled", "Subject", "Number", "Section", "Title");
+			        writer.write(colText);
+			        writer.newLine();
+			        
+			        outputText = String.format("%-6s %-8s %-8s %-8s %-8s %-31s", courseCRN_str, studentCount_str, courseSubject, courseNumber_str, courseSection_str, courseTitle);
+			        writer.write(outputText);
+			        writer.newLine();
+
+			        
+			        // Present notes below the course info
+			        writer.write("\tNotes: ");
+					
 					
 					courseCRN_str = currentCRN_str;
 				}
@@ -251,22 +237,28 @@ public class generateReport {
 				if (courseNote == null) {
 					//System.out.printf("none\n");
 					writer.write("none\n");
+					
+					lineCount++;
+					
 				} else if (noteNumber != 1) {
 					//System.out.printf("\t");
 					//System.out.printf(" %s \n", courseNote);
-					writer.write("\t");
-					
-					//writer.write("hello ");
-					
+					writer.write("\t");			
 					writer.write(courseNote + "\n");
+					
+					lineCount++;
 				} else {
 					//System.out.printf(" %s \n", courseNote);
-					//writer.write("hello I'm a new note");
-					
 					writer.write(courseNote + "\n");
+					
+					lineCount++;
 				}
 				
 				//writer.write("\n___ end good stuff ___ \n");
+				lineCount_str = String.valueOf(lineCount);
+				//writer.write("Line count: ");
+				//writer.write(lineCount);
+				
 				writer.close();
 
 
@@ -316,6 +308,20 @@ public class generateReport {
 			writer.write("Page 1 information" + (char)12);  
 			
 	        writer.write("Page 2 after page break char");  
+	        // System.out.println(padRight(greetings, 20) + "*");
+	        writer.write(padRight(greetings, 20) + "*");
+	        writer.newLine();
+	        writer.write(padRight("Col1", 20) + "*");
+	        writer.write(padRight("Col2", 20) + "*");
+	        writer.write(padRight("Col3", 20) + "*");
+	        writer.newLine();
+	        writer.write(padRight("CRN", 5) + " ");
+	        writer.write(padRight("Enrolled", 8) + " ");
+	        writer.write(padRight("Subject", 5) + " ");
+	        writer.write(padRight("number", 6) + " ");
+	        writer.write(padRight("Section", 7) + " ");
+	        writer.write(padRight("title", 31) + " ");
+	       
 			
 			writer.newLine();
 			writer.write(description);
@@ -425,6 +431,92 @@ public class generateReport {
 			}
 		}
 	}
+	
+	
+	public static String padRight(String s, int n) {
+	    return String.format("%1$-" + n + "s", s);  
+	}
+
+	public static String padLeft(String s, int n) {
+	   return String.format("%1$" + n + "s", s);  
+	}
+	
+	public static String setColWidth(String s, int n) {
+	    return String.format("%1$-" + n + "s", s);  
+	}
+	
+	
+	
+	
+	
+	
+	private static void display(ResultSet myRs) throws SQLException {
+		while (myRs.next()) {
+			
+			String studentWNum = myRs.getString("wNumber");
+			double courseCRN = myRs.getDouble("CRN");
+
+			
+			System.out.printf("%s, %.0f\n", studentWNum, courseCRN);
+		}
+	}
+
+	
+	
+	private static void displayAll(ResultSet myRs) throws SQLException {
+		while (myRs.next()) {
+			
+			int courseCRN = myRs.getInt("underEnrolledCRN");
+			int noteNumber = myRs.getInt("notenumber");
+			String studentWNum = myRs.getString("note");
+			
+			String courseSubject = myRs.getString("subject");
+			int courseNumber = myRs.getInt("number");
+			int courseSection = myRs.getInt("section");
+			String courseTitle = myRs.getString("title");
+			int studentCount = myRs.getInt("NumberOfStudents");
+			
+			System.out.printf("CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+		}
+	}
+	
+	
+	private static void displayCourseInfo(ResultSet myRs) throws SQLException {
+		
+		int currentCRN = 0;
+		
+		while (myRs.next()) {
+			
+			int courseCRN = myRs.getInt("underEnrolledCRN");
+			int noteNumber = myRs.getInt("notenumber");
+			String courseNote = myRs.getString("note");
+			
+			String courseSubject = myRs.getString("subject");
+			int courseNumber = myRs.getInt("number");
+			int courseSection = myRs.getInt("section");
+			String courseTitle = myRs.getString("title");
+			int studentCount = myRs.getInt("NumberOfStudents");
+			
+			if (courseCRN!=currentCRN) {
+				System.out.printf("\n  CRN: %d, Number of students enrolled: %d\n", courseCRN, studentCount);
+				System.out.printf("  %s %d %s \t(Section %d)\n", courseSubject, courseNumber, courseTitle, courseSection);
+				System.out.printf("\t Notes: ");
+				currentCRN = courseCRN;
+			}
+
+			//System.out.printf("\t Note: %d, %s \n", noteNumber, courseNote);
+			if (courseNote == null) {
+				System.out.printf("none\n");
+			} else if (noteNumber != 1) {
+				System.out.printf("\t");
+				System.out.printf(" %s \n", courseNote);
+			} else {
+			System.out.printf(" %s \n", courseNote);
+			}
+			
+		}
+	}
+	
 	
 	
 	
