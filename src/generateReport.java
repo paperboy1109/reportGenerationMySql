@@ -24,7 +24,8 @@ public class generateReport {
 		
 		try {
 			// 1. Get a connection to database
-			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/coscuw", "student" , "student");
+			//myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/coscuw", "student" , "student");
+			myConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/coscuw", "root" , "90dziaDANmySQL~+!");
 			
 			// 2. Prepare statement
 			myStmt = myConn.prepareStatement("select * from enrolledin where wNumber = ? and CRN > ? ");
@@ -118,8 +119,6 @@ public class generateReport {
 	
 	private static void createReportDocument(ResultSet myRs) throws SQLException {
 		
-		System.out.printf(" createReportDocument called \n");
-		
 		int pageCount = 0;
 		int lineCount = 0;
 		String lineCount_str = "";
@@ -130,6 +129,9 @@ public class generateReport {
 	
 
 		while (myRs.next()) {
+			
+			System.out.printf("Line count:");
+			System.out.printf("%d", lineCount);
 			
 			int courseCRN = myRs.getInt("underEnrolledCRN");
 			int noteNumber = myRs.getInt("notenumber");
@@ -220,15 +222,20 @@ public class generateReport {
 			        colText = String.format("%-6s %-8s %-8s %-8s %-8s %-31s", "CRN", "Enrolled", "Subject", "Number", "Section", "Title");
 			        writer.write(colText);
 			        writer.newLine();
+			        lineCount = lineCount + 2;
 			        
 			        outputText = String.format("%-6s %-8s %-8s %-8s %-8s %-31s", courseCRN_str, studentCount_str, courseSubject, courseNumber_str, courseSection_str, courseTitle);
 			        writer.write(outputText);
 			        writer.newLine();
+			        lineCount ++;
 
 			        
 			        // Present notes below the course info
-			        writer.write("\tNotes: ");
-					
+			        if (courseNote != null) {
+			        	writer.write("\tNotes: ");
+			        	lineCount++ ;
+					}
+			        
 					
 					courseCRN_str = currentCRN_str;
 				}
@@ -236,10 +243,9 @@ public class generateReport {
 				
 				if (courseNote == null) {
 					//System.out.printf("none\n");
-					writer.write("none\n");
-					
-					lineCount++;
-					
+					//writer.write("none\n");
+					writer.write("");
+										
 				} else if (noteNumber != 1) {
 					//System.out.printf("\t");
 					//System.out.printf(" %s \n", courseNote);
@@ -255,7 +261,9 @@ public class generateReport {
 				}
 				
 				//writer.write("\n___ end good stuff ___ \n");
-				lineCount_str = String.valueOf(lineCount);
+				
+				//lineCount_str = String.valueOf(lineCount);
+				
 				//writer.write("Line count: ");
 				//writer.write(lineCount);
 				
